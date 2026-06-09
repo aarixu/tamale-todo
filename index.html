@@ -12,36 +12,58 @@
   <!-- Babel -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-  <!-- Lucide React -->
+  <!-- Lucide (Standard) -->
   <script src="https://unpkg.com/lucide@latest"></script>
-  <script src="https://unpkg.com/lucide-react@latest/dist/umd/lucide-react.js"></script>
 </head>
 <body>
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState, useEffect, useMemo } = React;
-    const {
-      Check, Plus, Trash2, Edit3, Search, Download, X, ChevronDown, ChevronRight,
-      AlertCircle, Zap, Brain, Mic, Building2, Palette, Shield, Phone, CreditCard,
-      CheckCircle2, Database, Sparkles, RefreshCw, FileText
-    } = window.lucideReact;
+    const { useState, useEffect, useMemo, useRef } = React;
+
+    // A safe wrapper for rendering lucide icons in React without lucide-react package
+    const Icon = ({ name, size = 14, color = 'currentColor', style = {}, className = '', strokeWidth = 2 }) => {
+      const nodeRef = useRef(null);
+      
+      useEffect(() => {
+        if (nodeRef.current && window.lucide) {
+          nodeRef.current.innerHTML = '';
+          const i = document.createElement('i');
+          i.setAttribute('data-lucide', name);
+          nodeRef.current.appendChild(i);
+          
+          window.lucide.createIcons({
+            icons: window.lucide.icons,
+            root: nodeRef.current,
+            attrs: {
+              width: size,
+              height: size,
+              color: color,
+              'stroke-width': strokeWidth,
+              class: className
+            }
+          });
+        }
+      }, [name, size, color, strokeWidth, className]);
+      
+      return <span ref={nodeRef} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: size, height: size, ...style }} />;
+    };
 
     const STORAGE_KEY = 'tamale_todo_v4';
 
     const PHASES = {
-      shipped:    { label: 'SHIPPED',                                color: '#059669', icon: CheckCircle2 },
-      phaseD:     { label: 'PHASE D · Meta Channels',                color: '#0891b2', icon: Phone },
-      phaseF:     { label: 'PHASE F · Smart AI Vision',              color: '#d97706', icon: Brain },
-      phaseG:     { label: 'PHASE G · Voice Realism + Models',       color: '#9333ea', icon: Mic },
-      phaseH:     { label: 'PHASE H · Agency Dashboard',             color: '#db2777', icon: Building2 },
-      phaseI:     { label: 'PHASE I · UI Overhaul + Fork Isolation', color: '#e11d48', icon: Palette },
-      phaseJ:     { label: 'PHASE J · Robustness & Security',        color: '#0e7490', icon: Shield },
-      v2:         { label: 'V2 · WebRTC + Click-to-Call',            color: '#7c3aed', icon: Zap },
-      phaseC:     { label: 'PHASE C · Live Payments',                color: '#65a30d', icon: CreditCard },
-      phaseE:     { label: 'PHASE E · E2E Validation',               color: '#ca8a04', icon: CheckCircle2 },
-      goodToHave: { label: 'GOOD TO HAVE',                           color: '#64748b', icon: Sparkles },
-      scaling:    { label: 'SCALING (100+ users)',                   color: '#475569', icon: Database },
+      shipped:    { label: 'SHIPPED',                                color: '#059669', icon: 'check-circle' },
+      phaseD:     { label: 'PHASE D · Meta Channels',                color: '#0891b2', icon: 'phone' },
+      phaseF:     { label: 'PHASE F · Smart AI Vision',              color: '#d97706', icon: 'brain' },
+      phaseG:     { label: 'PHASE G · Voice Realism + Models',       color: '#9333ea', icon: 'mic' },
+      phaseH:     { label: 'PHASE H · Agency Dashboard',             color: '#db2777', icon: 'building-2' },
+      phaseI:     { label: 'PHASE I · UI Overhaul + Fork Isolation', color: '#e11d48', icon: 'palette' },
+      phaseJ:     { label: 'PHASE J · Robustness & Security',        color: '#0e7490', icon: 'shield' },
+      v2:         { label: 'V2 · WebRTC + Click-to-Call',            color: '#7c3aed', icon: 'zap' },
+      phaseC:     { label: 'PHASE C · Live Payments',                color: '#65a30d', icon: 'credit-card' },
+      phaseE:     { label: 'PHASE E · E2E Validation',               color: '#ca8a04', icon: 'check-circle' },
+      goodToHave: { label: 'GOOD TO HAVE',                           color: '#64748b', icon: 'sparkles' },
+      scaling:    { label: 'SCALING (100+ users)',                   color: '#475569', icon: 'database' },
     };
 
     function TamaleTodoDashboard() {
@@ -57,11 +79,9 @@
       const [showContext, setShowContext] = useState(false);
       const [fetchError, setFetchError] = useState(null);
 
-      // MOUNT: Load from localStorage or tasks.json
       useEffect(() => {
         (async () => {
           try {
-            // Check localStorage first
             const localData = window.localStorage.getItem(STORAGE_KEY);
             if (localData) {
               const parsed = JSON.parse(localData);
@@ -72,7 +92,6 @@
               }
             }
 
-            // Fallback to fetching tasks.json
             const res = await fetch('./tasks.json');
             if (!res.ok) throw new Error('Failed to fetch tasks.json');
             const data = await res.json();
@@ -88,7 +107,6 @@
         })();
       }, []);
 
-      // SAVE: persist to localStorage on change
       useEffect(() => {
         if (loading || tasks.length === 0) return;
         const t = setTimeout(() => {
@@ -135,7 +153,6 @@
           await navigator.clipboard.writeText(jsonStr);
           alert('JSON copied to clipboard! Paste it into tasks.json on GitHub.');
         } catch(e) {
-          // Fallback if clipboard API fails
           const blob = new Blob([jsonStr], { type: 'application/json' });
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
@@ -175,7 +192,7 @@
       if (loading) {
         return (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#fafafa', color: '#059669', fontFamily: 'ui-monospace,Menlo,monospace' }}>
-            <RefreshCw className="anim-spin" size={20} style={{ marginRight: 10 }} />
+            <Icon name="refresh-cw" className="anim-spin" size={20} style={{ marginRight: 10 }} />
             Loading TAMALE TODO state...
           </div>
         );
@@ -220,13 +237,13 @@
 
               <div style={{ display: 'flex', gap: 8 }}>
                 <button onClick={() => setShowContext(!showContext)} style={btnGhost} title="Show embedded project context">
-                  <FileText size={14} /> Context
+                  <Icon name="file-text" size={14} /> Context
                 </button>
                 <button onClick={() => setShowAdd(true)} style={btnPrimary}>
-                  <Plus size={14} /> Add Task
+                  <Icon name="plus" size={14} /> Add Task
                 </button>
-                <button onClick={copyJson} style={btnGhost} title="Copy JSON for GitHub"><Download size={14} /> Copy JSON</button>
-                <button onClick={resetAll} style={{ ...btnGhost, color: '#dc2626' }} title="Reset to repo tasks.json"><RefreshCw size={14} /></button>
+                <button onClick={copyJson} style={btnGhost} title="Copy JSON for GitHub"><Icon name="download" size={14} /> Copy JSON</button>
+                <button onClick={resetAll} style={{ ...btnGhost, color: '#dc2626' }} title="Reset to repo tasks.json"><Icon name="refresh-cw" size={14} /></button>
               </div>
             </div>
 
@@ -242,7 +259,7 @@
               <div className="card" style={{ background: 'white', borderRadius: 10, padding: 20, marginBottom: 20, fontSize: 12, lineHeight: 1.7, color: '#334155' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
                   <h3 style={{ margin: 0, fontSize: 13, fontWeight: 700, color: '#0f172a', letterSpacing: '0.05em' }}>📖 PROJECT CONTEXT</h3>
-                  <button onClick={() => setShowContext(false)} style={btnGhost}><X size={14} /></button>
+                  <button onClick={() => setShowContext(false)} style={btnGhost}><Icon name="x" size={14} /></button>
                 </div>
                 <div style={{ color: '#64748b', marginBottom: 12 }}>
                   Full project context lives in <code>context.md</code> — visible to any AI that reads this repo. To start a new chat:
@@ -267,7 +284,9 @@
             {/* CONTROLS */}
             <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
               <div style={{ position: 'relative', flex: '1 1 240px', minWidth: 200 }}>
-                <Search size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }}>
+                   <Icon name="search" size={14} />
+                </span>
                 <input placeholder="Search tasks..." value={search} onChange={e => setSearch(e.target.value)} style={{ ...inputStyle, paddingLeft: 32, width: '100%' }} />
               </div>
               <div style={{ display: 'flex', gap: 4, background: 'white', borderRadius: 6, padding: 3, border: '1px solid #e2e8f0' }}>
@@ -288,7 +307,7 @@
               <div className="card" style={{ background: 'white', borderRadius: 10, padding: 20, marginBottom: 24 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
                   <h3 style={{ margin: 0, fontSize: 13, color: '#0f172a', letterSpacing: '0.05em', textTransform: 'uppercase', fontWeight: 700 }}>+ New Task</h3>
-                  <button onClick={() => setShowAdd(false)} style={btnGhost}><X size={14} /></button>
+                  <button onClick={() => setShowAdd(false)} style={btnGhost}><Icon name="x" size={14} /></button>
                 </div>
                 <div style={{ display: 'grid', gap: 10 }}>
                   <select value={newTask.phase} onChange={e => setNewTask({ ...newTask, phase: e.target.value })} style={inputStyle}>
@@ -301,7 +320,7 @@
                   <textarea placeholder="Notes / context" value={newTask.notes} onChange={e => setNewTask({ ...newTask, notes: e.target.value })} style={{ ...inputStyle, minHeight: 60, resize: 'vertical' }} />
                   <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
                     <button onClick={() => setShowAdd(false)} style={btnGhost}>Cancel</button>
-                    <button onClick={addTask} style={btnPrimary} disabled={!newTask.title.trim()}><Check size={14} /> Add</button>
+                    <button onClick={addTask} style={btnPrimary} disabled={!newTask.title.trim()}><Icon name="check" size={14} /> Add</button>
                   </div>
                 </div>
               </div>
@@ -311,7 +330,6 @@
             {Object.entries(PHASES).map(([phaseKey, phaseMeta]) => {
               const items = byPhase[phaseKey] || [];
               if (items.length === 0 && search) return null;
-              const Icon = phaseMeta.icon;
               const total = items.length;
               const done = items.filter(t => t.done).length;
               const allTotal = tasks.filter(t => t.phase === phaseKey).length;
@@ -331,8 +349,8 @@
                       cursor: 'pointer', userSelect: 'none',
                     }}
                   >
-                    {collapsed ? <ChevronRight size={14} color="#94a3b8" /> : <ChevronDown size={14} color="#94a3b8" />}
-                    <Icon size={15} color={phaseMeta.color} />
+                    {collapsed ? <Icon name="chevron-right" size={14} color="#94a3b8" /> : <Icon name="chevron-down" size={14} color="#94a3b8" />}
+                    <Icon name={phaseMeta.icon} size={15} color={phaseMeta.color} />
                     <span style={{ fontSize: 12, fontWeight: 700, color: '#0f172a', letterSpacing: '0.05em', flex: 1 }}>
                       {phaseMeta.label}
                     </span>
@@ -364,7 +382,7 @@
                               display: 'flex', alignItems: 'center', justifyContent: 'center',
                             }}
                           >
-                            {task.done && <Check size={12} color="white" strokeWidth={3} />}
+                            {task.done && <Icon name="check" size={12} color="white" strokeWidth={3} />}
                           </div>
 
                           <div style={{ flex: 1, minWidth: 0 }}>
@@ -374,7 +392,7 @@
                                 <input value={editDraft.effort} onChange={e => setEditDraft({ ...editDraft, effort: e.target.value })} style={inputStyle} placeholder="effort" />
                                 <textarea value={editDraft.notes} onChange={e => setEditDraft({ ...editDraft, notes: e.target.value })} style={{ ...inputStyle, minHeight: 50 }} placeholder="notes" />
                                 <div style={{ display: 'flex', gap: 6 }}>
-                                  <button onClick={saveEdit} style={btnPrimary}><Check size={12}/> Save</button>
+                                  <button onClick={saveEdit} style={btnPrimary}><Icon name="check" size={12}/> Save</button>
                                   <button onClick={() => setEditingId(null)} style={btnGhost}>Cancel</button>
                                 </div>
                               </div>
@@ -403,8 +421,8 @@
 
                           {editingId !== task.id && (
                             <div style={{ display: 'flex', gap: 4, opacity: 0.5 }}>
-                              <button onClick={() => startEdit(task)} style={iconBtn}><Edit3 size={12} /></button>
-                              <button onClick={() => deleteTask(task.id)} style={{ ...iconBtn, color: '#dc2626' }}><Trash2 size={12} /></button>
+                              <button onClick={() => startEdit(task)} style={iconBtn}><Icon name="edit-3" size={12} /></button>
+                              <button onClick={() => deleteTask(task.id)} style={{ ...iconBtn, color: '#dc2626' }}><Icon name="trash-2" size={12} /></button>
                             </div>
                           )}
                         </div>
@@ -417,7 +435,7 @@
 
             <div style={{ marginTop: 40, padding: '16px 0', borderTop: '1px solid #e2e8f0', fontSize: 11, color: '#94a3b8', textAlign: 'center', letterSpacing: '0.05em' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                <AlertCircle size={11} />
+                <Icon name="alert-circle" size={11} />
                 State persists locally across sessions · Updates saved to localStorage · Copy JSON to push updates
               </div>
             </div>
