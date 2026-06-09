@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TAMALE Production Roadmap</title>
+  
+  <!-- React & ReactDOM -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  
+  <!-- Babel -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Lucide React -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://unpkg.com/lucide-react@latest/dist/umd/lucide-react.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useMemo } = React;
+    const {
+      Check, Plus, Trash2, Edit3, Search, Download, X, ChevronDown, ChevronRight,
+      AlertCircle, Zap, Brain, Mic, Building2, Palette, Shield, Phone, CreditCard,
+      CheckCircle2, Database, Sparkles, RefreshCw, FileText
+    } = window.lucideReact;
+
+    const STORAGE_KEY = 'tamale_todo_v4';
+
+    const PHASES = {
+      shipped:    { label: 'SHIPPED',                                color: '#059669', icon: CheckCircle2 },
+      phaseD:     { label: 'PHASE D · Meta Channels',                color: '#0891b2', icon: Phone },
+      phaseF:     { label: 'PHASE F · Smart AI Vision',              color: '#d97706', icon: Brain },
+      phaseG:     { label: 'PHASE G · Voice Realism + Models',       color: '#9333ea', icon: Mic },
+      phaseH:     { label: 'PHASE H · Agency Dashboard',             color: '#db2777', icon: Building2 },
+      phaseI:     { label: 'PHASE I · UI Overhaul + Fork Isolation', color: '#e11d48', icon: Palette },
+      phaseJ:     { label: 'PHASE J · Robustness & Security',        color: '#0e7490', icon: Shield },
+      v2:         { label: 'V2 · WebRTC + Click-to-Call',            color: '#7c3aed', icon: Zap },
+      phaseC:     { label: 'PHASE C · Live Payments',                color: '#65a30d', icon: CreditCard },
+      phaseE:     { label: 'PHASE E · E2E Validation',               color: '#ca8a04', icon: CheckCircle2 },
+      goodToHave: { label: 'GOOD TO HAVE',                           color: '#64748b', icon: Sparkles },
+      scaling:    { label: 'SCALING (100+ users)',                   color: '#475569', icon: Database },
+    };
+
+    function TamaleTodoDashboard() {
+      const [tasks, setTasks] = useState([]);
+      const [loading, setLoading] = useState(true);
+      const [search, setSearch] = useState('');
+      const [filter, setFilter] = useState('all');
+      const [collapsedPhases, setCollapsedPhases] = useState({ shipped: true, scaling: true, goodToHave: true });
+      const [showAdd, setShowAdd] = useState(false);
+      const [newTask, setNewTask] = useState({ phase: 'phaseD', title: '', effort: '', notes: '' });
+      const [editingId, setEditingId] = useState(null);
+      const [editDraft, setEditDraft] = useState({});
+      const [showContext, setShowContext] = useState(false);
+      const [fetchError, setFetchError] = useState(null);
+
+      // MOUNT: Load from localStorage or tasks.json
+      useEffect(() => {
+        (async () => {
+          try {
+            // Check localStorage first
+            const localData = window.localStorage.getItem(STORAGE_KEY);
+            if (localData) {
+              const parsed = JSON.parse(localData);
+              if (Array.isArray(parsed) && parsed.length > 0) {
+                setTasks(parsed);
+                setLoading(false);
+                return;
+              }
+            }
+
+            // Fallback to fetching tasks.json
+            const res = await fetch('./tasks.json');
+            if (!res.ok) throw new Error('Failed to fetch tasks.json');
+            const data = await res.json();
+            if (data && data.tasks) {
+              setTasks(data.tasks);
+            }
+          } catch (e) {
+            console.error(e);
+            setFetchError(e.message);
+          } finally {
+            setLoading(false);
+          }
+        })();
+      }, []);
+
+      // SAVE: persist to localStorage on change
+      useEffect(() => {
+        if (loading || tasks.length === 0) return;
+        const t = setTimeout(() => {
+          try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks)); }
+          catch (e) { console.error('Save failed', e); }
+        }, 300);
+        return () => clearTimeout(t);
+      }, [tasks, loading]);
+
+      const toggleDone = (id) => setTasks(t => t.map(x => x.id === id ? { ...x, done: !x.done } : x));
+      const deleteTask = (id) => { if (confirm('Delete this task?')) setTasks(t => t.filter(x => x.id !== id)); };
+      const startEdit = (task) => { setEditingId(task.id); setEditDraft({ title: task.title, effort: task.effort, notes: task.notes, phase: task.phase }); };
+      const saveEdit = () => { setTasks(t => t.map(x => x.id === editingId ? { ...x, ...editDraft } : x)); setEditingId(null); };
+      const addTask = () => {
+        if (!newTask.title.trim()) return;
+        setTasks(t => [...t, { ...newTask, id: 'u' + Date.now(), done: false }]);
+        setNewTask({ phase: newTask.phase, title: '', effort: '', notes: '' });
+        setShowAdd(false);
+      };
+      
+      const resetAll = async () => {
+        if (!confirm('Reset to remote tasks.json? This will WIPE local unsaved progress.')) return;
+        setLoading(true);
+        try {
+          window.localStorage.removeItem(STORAGE_KEY);
+          const res = await fetch('./tasks.json');
+          const data = await res.json();
+          setTasks(data.tasks);
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setLoading(false);
+        }
+      };
+
+      const copyJson = async () => {
+        const payload = {
+          version: "4.2",
+          lastUpdated: new Date().toISOString().slice(0, 10),
+          tasks: tasks
+        };
+        const jsonStr = JSON.stringify(payload, null, 2);
+        try {
+          await navigator.clipboard.writeText(jsonStr);
+          alert('JSON copied to clipboard! Paste it into tasks.json on GitHub.');
+        } catch(e) {
+          // Fallback if clipboard API fails
+          const blob = new Blob([jsonStr], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url; a.download = `tasks.json`; a.click();
+          URL.revokeObjectURL(url);
+        }
+      };
+
+      const togglePhase = (phase) => setCollapsedPhases(p => ({ ...p, [phase]: !p[phase] }));
+
+      const filtered = useMemo(() => tasks.filter(t => {
+        if (filter === 'open' && t.done) return false;
+        if (filter === 'done' && !t.done) return false;
+        if (search) {
+          const s = search.toLowerCase();
+          return t.title.toLowerCase().includes(s) || (t.notes || '').toLowerCase().includes(s);
+        }
+        return true;
+      }), [tasks, search, filter]);
+
+      const byPhase = useMemo(() => {
+        const map = {};
+        Object.keys(PHASES).forEach(p => map[p] = []);
+        filtered.forEach(t => { if (!map[t.phase]) map[t.phase] = []; map[t.phase].push(t); });
+        return map;
+      }, [filtered]);
+
+      const stats = useMemo(() => {
+        const total = tasks.length;
+        const done = tasks.filter(t => t.done).length;
+        const shipped = tasks.filter(t => t.phase === 'shipped').length;
+        const activePending = tasks.filter(t => !t.done && t.phase !== 'shipped' && t.phase !== 'scaling' && t.phase !== 'goodToHave').length;
+        const pct = total ? Math.round((done / total) * 100) : 0;
+        return { total, done, shipped, activePending, pct };
+      }, [tasks]);
+
+      if (loading) {
+        return (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#fafafa', color: '#059669', fontFamily: 'ui-monospace,Menlo,monospace' }}>
+            <RefreshCw className="anim-spin" size={20} style={{ marginRight: 10 }} />
+            Loading TAMALE TODO state...
+          </div>
+        );
+      }
+
+      return (
+        <div style={{
+          minHeight: '100vh',
+          background: '#fafafa',
+          color: '#1f2937',
+          fontFamily: 'ui-monospace, "SF Mono", Menlo, Consolas, monospace',
+          padding: '24px 20px',
+        }}>
+          <style>{`
+            .card { box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 0 0 1px rgba(15, 23, 42, 0.05); }
+            .task-row { transition: background 0.15s; }
+            .task-row:hover { background: #f8fafc; }
+            .checkbox { transition: all 0.15s; cursor: pointer; }
+            .checkbox:hover { transform: scale(1.1); }
+            @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.4} }
+            .anim-spin { animation: spin 1s linear infinite; }
+            @keyframes spin { from{transform:rotate(0)} to{transform:rotate(360deg)} }
+            button { font-family: inherit; }
+            input, select, textarea { font-family: inherit; }
+            ::selection { background: #059669; color: white; }
+          `}</style>
+
+          <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+            {/* HEADER */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, flexWrap: 'wrap', gap: 16 }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ width: 10, height: 10, background: '#059669', borderRadius: '50%', boxShadow: '0 0 10px rgba(5, 150, 105, 0.6)', animation: 'pulse 2s infinite' }} />
+                  <h1 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em', margin: 0, color: '#0f172a' }}>
+                    TAMALE <span style={{ color: '#94a3b8', fontWeight: 400 }}>// production roadmap</span>
+                  </h1>
+                </div>
+                <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 6, letterSpacing: '0.05em' }}>
+                  v4.2 · {new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })} · auto-saved to browser
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button onClick={() => setShowContext(!showContext)} style={btnGhost} title="Show embedded project context">
+                  <FileText size={14} /> Context
+                </button>
+                <button onClick={() => setShowAdd(true)} style={btnPrimary}>
+                  <Plus size={14} /> Add Task
+                </button>
+                <button onClick={copyJson} style={btnGhost} title="Copy JSON for GitHub"><Download size={14} /> Copy JSON</button>
+                <button onClick={resetAll} style={{ ...btnGhost, color: '#dc2626' }} title="Reset to repo tasks.json"><RefreshCw size={14} /></button>
+              </div>
+            </div>
+
+            {/* ERROR */}
+            {fetchError && (
+              <div style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626', padding: '12px 16px', borderRadius: 8, fontSize: 13, marginBottom: 20 }}>
+                Error fetching tasks.json: {fetchError}
+              </div>
+            )}
+
+            {/* CONTEXT PANEL */}
+            {showContext && (
+              <div className="card" style={{ background: 'white', borderRadius: 10, padding: 20, marginBottom: 20, fontSize: 12, lineHeight: 1.7, color: '#334155' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
+                  <h3 style={{ margin: 0, fontSize: 13, fontWeight: 700, color: '#0f172a', letterSpacing: '0.05em' }}>📖 PROJECT CONTEXT</h3>
+                  <button onClick={() => setShowContext(false)} style={btnGhost}><X size={14} /></button>
+                </div>
+                <div style={{ color: '#64748b', marginBottom: 12 }}>
+                  Full project context lives in <code>context.md</code> — visible to any AI that reads this repo. To start a new chat:
+                </div>
+                <div style={{ background: '#f1f5f9', padding: 12, borderRadius: 6, fontFamily: 'inherit', fontSize: 11, color: '#334155', border: '1px solid #e2e8f0' }}>
+                  "Read context.md and tasks.json, we'll work on <strong style={{ color: '#059669' }}>&lt;task ID&gt;</strong>"
+                </div>
+                <div style={{ marginTop: 14, fontSize: 11, color: '#64748b' }}>
+                  <strong style={{ color: '#0f172a' }}>Quick refs:</strong> VM 34.131.162.197 · tamaleapp.com · voice.tamaleapp.com · Antigravity for deploys · 1 task = 1 chat · surgical edits only · never `docker compose down`
+                </div>
+              </div>
+            )}
+
+            {/* STATS */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, marginBottom: 24 }}>
+              <StatCard label="Overall Progress" value={`${stats.pct}%`} sub={`${stats.done} / ${stats.total}`} accent="#059669" progress={stats.pct} />
+              <StatCard label="Shipped" value={stats.shipped} sub="features live" accent="#059669" />
+              <StatCard label="Active Pending" value={stats.activePending} sub="critical + features" accent="#d97706" />
+              <StatCard label="Total Tasks" value={stats.total} sub="across all phases" accent="#0891b2" />
+            </div>
+
+            {/* CONTROLS */}
+            <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
+              <div style={{ position: 'relative', flex: '1 1 240px', minWidth: 200 }}>
+                <Search size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                <input placeholder="Search tasks..." value={search} onChange={e => setSearch(e.target.value)} style={{ ...inputStyle, paddingLeft: 32, width: '100%' }} />
+              </div>
+              <div style={{ display: 'flex', gap: 4, background: 'white', borderRadius: 6, padding: 3, border: '1px solid #e2e8f0' }}>
+                {['all', 'open', 'done'].map(f => (
+                  <button key={f} onClick={() => setFilter(f)} style={{
+                    ...btnGhost,
+                    background: filter === f ? '#f1f5f9' : 'transparent',
+                    color: filter === f ? '#0f172a' : '#94a3b8',
+                    padding: '6px 12px', textTransform: 'uppercase', fontSize: 11, letterSpacing: '0.05em',
+                    border: 'none',
+                  }}>{f}</button>
+                ))}
+              </div>
+            </div>
+
+            {/* ADD TASK */}
+            {showAdd && (
+              <div className="card" style={{ background: 'white', borderRadius: 10, padding: 20, marginBottom: 24 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                  <h3 style={{ margin: 0, fontSize: 13, color: '#0f172a', letterSpacing: '0.05em', textTransform: 'uppercase', fontWeight: 700 }}>+ New Task</h3>
+                  <button onClick={() => setShowAdd(false)} style={btnGhost}><X size={14} /></button>
+                </div>
+                <div style={{ display: 'grid', gap: 10 }}>
+                  <select value={newTask.phase} onChange={e => setNewTask({ ...newTask, phase: e.target.value })} style={inputStyle}>
+                    {Object.entries(PHASES).filter(([k]) => k !== 'shipped').map(([k, v]) => (
+                      <option key={k} value={k}>{v.label}</option>
+                    ))}
+                  </select>
+                  <input placeholder="Task title (required)" value={newTask.title} onChange={e => setNewTask({ ...newTask, title: e.target.value })} style={inputStyle} autoFocus />
+                  <input placeholder="Effort estimate (e.g. 2h, 1 day)" value={newTask.effort} onChange={e => setNewTask({ ...newTask, effort: e.target.value })} style={inputStyle} />
+                  <textarea placeholder="Notes / context" value={newTask.notes} onChange={e => setNewTask({ ...newTask, notes: e.target.value })} style={{ ...inputStyle, minHeight: 60, resize: 'vertical' }} />
+                  <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                    <button onClick={() => setShowAdd(false)} style={btnGhost}>Cancel</button>
+                    <button onClick={addTask} style={btnPrimary} disabled={!newTask.title.trim()}><Check size={14} /> Add</button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* PHASES */}
+            {Object.entries(PHASES).map(([phaseKey, phaseMeta]) => {
+              const items = byPhase[phaseKey] || [];
+              if (items.length === 0 && search) return null;
+              const Icon = phaseMeta.icon;
+              const total = items.length;
+              const done = items.filter(t => t.done).length;
+              const allTotal = tasks.filter(t => t.phase === phaseKey).length;
+              const allDone = tasks.filter(t => t.phase === phaseKey && t.done).length;
+              const collapsed = collapsedPhases[phaseKey];
+
+              return (
+                <div key={phaseKey} style={{ marginBottom: 14 }}>
+                  <div
+                    onClick={() => togglePhase(phaseKey)}
+                    className="card"
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px',
+                      background: 'white',
+                      borderLeft: `3px solid ${phaseMeta.color}`,
+                      borderRadius: collapsed ? 8 : '8px 8px 0 0',
+                      cursor: 'pointer', userSelect: 'none',
+                    }}
+                  >
+                    {collapsed ? <ChevronRight size={14} color="#94a3b8" /> : <ChevronDown size={14} color="#94a3b8" />}
+                    <Icon size={15} color={phaseMeta.color} />
+                    <span style={{ fontSize: 12, fontWeight: 700, color: '#0f172a', letterSpacing: '0.05em', flex: 1 }}>
+                      {phaseMeta.label}
+                    </span>
+                    <span style={{ fontSize: 11, color: '#64748b', fontVariantNumeric: 'tabular-nums', fontWeight: 600 }}>
+                      {allDone}/{allTotal} {search && `(${done}/${total} filtered)`}
+                    </span>
+                    {allTotal > 0 && (
+                      <div style={{ width: 60, height: 4, background: '#f1f5f9', borderRadius: 2, overflow: 'hidden' }}>
+                        <div style={{ width: `${(allDone/allTotal)*100}%`, height: '100%', background: phaseMeta.color, transition: 'width 0.3s' }} />
+                      </div>
+                    )}
+                  </div>
+
+                  {!collapsed && items.length > 0 && (
+                    <div style={{ background: 'white', border: '1px solid #e2e8f0', borderTop: 'none', borderRadius: '0 0 8px 8px' }}>
+                      {items.map((task, idx) => (
+                        <div key={task.id} className="task-row" style={{
+                          display: 'flex', gap: 12, padding: '12px 14px',
+                          borderBottom: idx < items.length - 1 ? '1px solid #f1f5f9' : 'none',
+                          alignItems: 'flex-start',
+                        }}>
+                          <div
+                            className="checkbox"
+                            onClick={() => toggleDone(task.id)}
+                            style={{
+                              width: 18, height: 18, borderRadius: 4, marginTop: 2, flexShrink: 0,
+                              border: `1.5px solid ${task.done ? phaseMeta.color : '#cbd5e1'}`,
+                              background: task.done ? phaseMeta.color : 'white',
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            }}
+                          >
+                            {task.done && <Check size={12} color="white" strokeWidth={3} />}
+                          </div>
+
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            {editingId === task.id ? (
+                              <div style={{ display: 'grid', gap: 6 }}>
+                                <input value={editDraft.title} onChange={e => setEditDraft({ ...editDraft, title: e.target.value })} style={inputStyle} />
+                                <input value={editDraft.effort} onChange={e => setEditDraft({ ...editDraft, effort: e.target.value })} style={inputStyle} placeholder="effort" />
+                                <textarea value={editDraft.notes} onChange={e => setEditDraft({ ...editDraft, notes: e.target.value })} style={{ ...inputStyle, minHeight: 50 }} placeholder="notes" />
+                                <div style={{ display: 'flex', gap: 6 }}>
+                                  <button onClick={saveEdit} style={btnPrimary}><Check size={12}/> Save</button>
+                                  <button onClick={() => setEditingId(null)} style={btnGhost}>Cancel</button>
+                                </div>
+                              </div>
+                            ) : (
+                              <>
+                                <div style={{
+                                  fontSize: 13, color: task.done ? '#94a3b8' : '#0f172a',
+                                  textDecoration: task.done ? 'line-through' : 'none',
+                                  lineHeight: 1.5, fontWeight: task.done ? 400 : 500,
+                                }}>
+                                  {task.title}
+                                  {task.effort && (
+                                    <span style={{
+                                      marginLeft: 8, fontSize: 10, color: phaseMeta.color,
+                                      background: `${phaseMeta.color}15`, padding: '2px 6px', borderRadius: 3,
+                                      letterSpacing: '0.05em', fontWeight: 700, verticalAlign: 'middle',
+                                    }}>{task.effort}</span>
+                                  )}
+                                </div>
+                                {task.notes && (
+                                  <div style={{ fontSize: 11, color: '#64748b', marginTop: 4, lineHeight: 1.5 }}>{task.notes}</div>
+                                )}
+                              </>
+                            )}
+                          </div>
+
+                          {editingId !== task.id && (
+                            <div style={{ display: 'flex', gap: 4, opacity: 0.5 }}>
+                              <button onClick={() => startEdit(task)} style={iconBtn}><Edit3 size={12} /></button>
+                              <button onClick={() => deleteTask(task.id)} style={{ ...iconBtn, color: '#dc2626' }}><Trash2 size={12} /></button>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+
+            <div style={{ marginTop: 40, padding: '16px 0', borderTop: '1px solid #e2e8f0', fontSize: 11, color: '#94a3b8', textAlign: 'center', letterSpacing: '0.05em' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                <AlertCircle size={11} />
+                State persists locally across sessions · Updates saved to localStorage · Copy JSON to push updates
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    const StatCard = ({ label, value, sub, accent, progress }) => (
+      <div className="card" style={{
+        background: 'white', borderRadius: 8, padding: '14px 16px',
+        position: 'relative', overflow: 'hidden',
+      }}>
+        <div style={{ fontSize: 10, color: '#94a3b8', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 6, fontWeight: 700 }}>{label}</div>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+          <div style={{ fontSize: 24, fontWeight: 700, color: '#0f172a', fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.02em' }}>{value}</div>
+          <div style={{ fontSize: 11, color: '#94a3b8' }}>{sub}</div>
+        </div>
+        {progress !== undefined && (
+          <div style={{ marginTop: 10, height: 3, background: '#f1f5f9', borderRadius: 2, overflow: 'hidden' }}>
+            <div style={{ width: `${progress}%`, height: '100%', background: accent, transition: 'width 0.4s' }} />
+          </div>
+        )}
+      </div>
+    );
+
+    const inputStyle = {
+      background: 'white', border: '1px solid #e2e8f0', borderRadius: 6,
+      padding: '8px 12px', color: '#0f172a', fontSize: 13,
+      outline: 'none', width: '100%', boxSizing: 'border-box',
+    };
+
+    const btnPrimary = {
+      display: 'inline-flex', alignItems: 'center', gap: 6,
+      background: '#059669', color: 'white', border: 'none',
+      padding: '8px 14px', borderRadius: 6, cursor: 'pointer',
+      fontSize: 12, fontWeight: 600, letterSpacing: '0.03em',
+      boxShadow: '0 1px 2px rgba(5, 150, 105, 0.2)',
+    };
+
+    const btnGhost = {
+      display: 'inline-flex', alignItems: 'center', gap: 6,
+      background: 'white', color: '#475569',
+      border: '1px solid #e2e8f0',
+      padding: '8px 12px', borderRadius: 6, cursor: 'pointer',
+      fontSize: 12, fontWeight: 500,
+    };
+
+    const iconBtn = {
+      background: 'transparent', border: 'none', color: '#94a3b8',
+      padding: 4, cursor: 'pointer', borderRadius: 4,
+      display: 'inline-flex', alignItems: 'center',
+    };
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<TamaleTodoDashboard />);
+  </script>
+</body>
+</html>
