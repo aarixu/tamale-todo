@@ -49,21 +49,22 @@
       return <span ref={nodeRef} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: size, height: size, ...style }} />;
     };
 
-    const STORAGE_KEY = 'tamale_todo_v4';
+    const STORAGE_KEY = 'tamale_todo_v5';
 
     const PHASES = {
-      shipped:    { label: 'SHIPPED',                                color: '#059669', icon: 'check-circle' },
-      phaseD:     { label: 'PHASE D · Meta Channels',                color: '#0891b2', icon: 'phone' },
-      phaseF:     { label: 'PHASE F · Smart AI Vision',              color: '#d97706', icon: 'brain' },
-      phaseG:     { label: 'PHASE G · Voice Realism + Models',       color: '#9333ea', icon: 'mic' },
-      phaseH:     { label: 'PHASE H · Agency Dashboard',             color: '#db2777', icon: 'building-2' },
-      phaseI:     { label: 'PHASE I · UI Overhaul + Fork Isolation', color: '#e11d48', icon: 'palette' },
-      phaseJ:     { label: 'PHASE J · Robustness & Security',        color: '#0e7490', icon: 'shield' },
-      v2:         { label: 'V2 · WebRTC + Click-to-Call',            color: '#7c3aed', icon: 'zap' },
-      phaseC:     { label: 'PHASE C · Live Payments',                color: '#65a30d', icon: 'credit-card' },
-      phaseE:     { label: 'PHASE E · E2E Validation',               color: '#ca8a04', icon: 'check-circle' },
-      goodToHave: { label: 'GOOD TO HAVE',                           color: '#64748b', icon: 'sparkles' },
-      scaling:    { label: 'SCALING (100+ users)',                   color: '#475569', icon: 'database' },
+      shipped:    { label: 'SHIPPED',                                      color: '#059669', icon: 'check-circle' },
+      phaseD:     { label: 'PHASE D · Meta Channels',                      color: '#0891b2', icon: 'phone' },
+      phaseF:     { label: 'PHASE F · Smart AI Vision',                    color: '#d97706', icon: 'brain' },
+      phaseG:     { label: 'PHASE G · Voice Realism + Models',             color: '#9333ea', icon: 'mic' },
+      phaseH:     { label: 'PHASE H · Agency Dashboard',                   color: '#db2777', icon: 'building-2' },
+      phaseK:     { label: 'PHASE K · Voice Overhaul (Dograh → LiveKit)', color: '#dc2626', icon: 'radio' },
+      phaseI:     { label: 'PHASE I · UI Overhaul + Fork Isolation',       color: '#e11d48', icon: 'palette' },
+      phaseJ:     { label: 'PHASE J · Robustness & Security',              color: '#0e7490', icon: 'shield' },
+      v2:         { label: 'V2 · WebRTC + Click-to-Call',                  color: '#7c3aed', icon: 'zap' },
+      phaseC:     { label: 'PHASE C · Live Payments',                      color: '#65a30d', icon: 'credit-card' },
+      phaseE:     { label: 'PHASE E · E2E Validation',                     color: '#ca8a04', icon: 'check-circle' },
+      goodToHave: { label: 'GOOD TO HAVE',                                 color: '#64748b', icon: 'sparkles' },
+      scaling:    { label: 'SCALING (100+ users)',                         color: '#475569', icon: 'database' },
     };
 
     function TamaleTodoDashboard() {
