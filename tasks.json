@@ -1,6 +1,6 @@
 {
-  "version": "4.3",
-  "lastUpdated": "2026-06-18",
+  "version": "4.4",
+  "lastUpdated": "2026-06-27",
   "executionOrder": "Phase K (Voice) → Phase I (UI/Landing) → Phase J (Security) → Final Audit",
   "tasks": [
     {
@@ -233,7 +233,7 @@
       "title": "G.4 BYOK (Bring Your Own Key) UI",
       "effort": "8h",
       "notes": "Per-user encrypted key storage (rails encrypts), fallback to platform key if user key fails",
-      "done": false
+      "done": true
     },
     {
       "id": "g5",
@@ -313,7 +313,7 @@
       "title": "K.0.1 GCP snapshot + DB dump (tamale-pre-phase-k)",
       "effort": "15m",
       "notes": "Pre-work safety net before any LiveKit changes",
-      "done": false
+      "done": true
     },
     {
       "id": "k0_2",
@@ -321,7 +321,7 @@
       "title": "K.0.2 Audit Dograh tamale-production branch — document all integration points with Chatwoot",
       "effort": "2h",
       "notes": "Map every place Dograh talks to Chatwoot (webhooks, JWT SSO, quota checks, conversation creation)",
-      "done": false
+      "done": true
     },
     {
       "id": "k0_3",
@@ -329,7 +329,7 @@
       "title": "K.0.3 List all Dograh features to replicate (STT, TTS, call triggering, transcript saving, escalation)",
       "effort": "1h",
       "notes": "Feature parity checklist before decommission",
-      "done": false
+      "done": true
     },
     {
       "id": "k0_4",
@@ -337,7 +337,7 @@
       "title": "K.0.4 Map Dograh env vars to LiveKit equivalent env vars",
       "effort": "30m",
       "notes": "Document old → new env var mapping for .env migration",
-      "done": false
+      "done": true
     },
     {
       "id": "k0_5",
@@ -345,7 +345,7 @@
       "title": "K.0.5 Verify Cartesia account + API key (ElevenLabs replacement TTS)",
       "effort": "15m",
       "notes": "Cartesia is the TTS provider for LiveKit stack",
-      "done": false
+      "done": true
     },
     {
       "id": "k0_6",
@@ -353,7 +353,7 @@
       "title": "K.0.6 Verify Deepgram account + API key (STT)",
       "effort": "15m",
       "notes": "Deepgram is the STT provider for LiveKit stack",
-      "done": false
+      "done": true
     },
     {
       "id": "k1_1",
@@ -361,7 +361,7 @@
       "title": "K.1.1 Add tamale-livekit service to docker-compose.yml",
       "effort": "1h",
       "notes": "K.1 — LiveKit Server Deployment (2 days)",
-      "done": false
+      "done": true
     },
     {
       "id": "k1_2",
@@ -369,7 +369,7 @@
       "title": "K.1.2 Create livekit-config.yaml (ports, API keys, TURN config)",
       "effort": "1h",
       "notes": "",
-      "done": false
+      "done": true
     },
     {
       "id": "k1_3",
@@ -377,7 +377,7 @@
       "title": "K.1.3 Generate LiveKit API key + secret pair",
       "effort": "15m",
       "notes": "",
-      "done": false
+      "done": true
     },
     {
       "id": "k1_4",
@@ -385,7 +385,7 @@
       "title": "K.1.4 Open GCP firewall ports (7880 TCP, 7881 TCP, 50000-50100 UDP)",
       "effort": "30m",
       "notes": "",
-      "done": false
+      "done": true
     },
     {
       "id": "k1_5",
@@ -393,7 +393,7 @@
       "title": "K.1.5 Deploy and verify LiveKit server running",
       "effort": "1h",
       "notes": "",
-      "done": false
+      "done": true
     },
     {
       "id": "k1_6",
@@ -401,7 +401,7 @@
       "title": "K.1.6 Test with LiveKit CLI (lk room list, lk room create)",
       "effort": "30m",
       "notes": "",
-      "done": false
+      "done": true
     },
     {
       "id": "k1_7",
@@ -409,7 +409,7 @@
       "title": "K.1.7 Update nginx config — proxy /livekit to LiveKit server",
       "effort": "30m",
       "notes": "",
-      "done": false
+      "done": true
     },
     {
       "id": "k2_1",
@@ -417,7 +417,7 @@
       "title": "K.2.1 Create tamale-voice-agent/ directory structure",
       "effort": "30m",
       "notes": "K.2 — Basic Voice Agent (3 days)",
-      "done": false
+      "done": true
     },
     {
       "id": "k2_2",
@@ -425,7 +425,7 @@
       "title": "K.2.2 Install livekit-agents with Deepgram + Cartesia + DeepSeek plugins",
       "effort": "1h",
       "notes": "",
-      "done": false
+      "done": true
     },
     {
       "id": "k2_3",
@@ -433,7 +433,7 @@
       "title": "K.2.3 Write basic agent entrypoint — hardcoded persona, STT to LLM to TTS pipeline",
       "effort": "3h",
       "notes": "",
-      "done": false
+      "done": true
     },
     {
       "id": "k2_4",
@@ -441,7 +441,7 @@
       "title": "K.2.4 Create Dockerfile for voice agent container",
       "effort": "1h",
       "notes": "",
-      "done": false
+      "done": true
     },
     {
       "id": "k2_5",
@@ -449,7 +449,7 @@
       "title": "K.2.5 Add tamale-voice-agent service to docker-compose.yml",
       "effort": "30m",
       "notes": "",
-      "done": false
+      "done": true
     },
     {
       "id": "k2_6",
@@ -457,7 +457,7 @@
       "title": "K.2.6 Test via LiveKit Playground — speak and get AI response",
       "effort": "1h",
       "notes": "",
-      "done": false
+      "done": true
     },
     {
       "id": "k2_7",
@@ -465,7 +465,7 @@
       "title": "K.2.7 Tune latency — measure end-of-turn to first-audio-token",
       "effort": "2h",
       "notes": "",
-      "done": false
+      "done": true
     },
     {
       "id": "k2_8",
@@ -473,7 +473,7 @@
       "title": "K.2.8 Test Cartesia voice quality vs ElevenLabs",
       "effort": "1h",
       "notes": "",
-      "done": false
+      "done": true
     },
     {
       "id": "k3_1",
@@ -481,7 +481,7 @@
       "title": "K.3.1 Design room naming convention: {account_id}-{conversation_id}-{timestamp}",
       "effort": "30m",
       "notes": "K.3 — Multi-Tenant Agent Dispatch (4 days)",
-      "done": false
+      "done": true
     },
     {
       "id": "k3_2",
@@ -489,7 +489,7 @@
       "title": "K.3.2 Create VoiceConfig model in Rails (per-account voice settings)",
       "effort": "2h",
       "notes": "",
-      "done": false
+      "done": true
     },
     {
       "id": "k3_3",
@@ -497,7 +497,7 @@
       "title": "K.3.3 Rails API endpoint POST /api/v1/voice/rooms — creates LiveKit room with tenant metadata",
       "effort": "2h",
       "notes": "",
-      "done": false
+      "done": true
     },
     {
       "id": "k3_4",
@@ -505,7 +505,7 @@
       "title": "K.3.4 Agent reads room.metadata on join — loads tenant-specific config",
       "effort": "2h",
       "notes": "",
-      "done": false
+      "done": true
     },
     {
       "id": "k3_5",
@@ -513,7 +513,7 @@
       "title": "K.3.5 Per-tenant voice selection (Cartesia voice ID in VoiceConfig)",
       "effort": "1h",
       "notes": "",
-      "done": false
+      "done": true
     },
     {
       "id": "k3_6",
@@ -521,7 +521,7 @@
       "title": "K.3.6 Per-tenant system prompt / persona loading from AgentBot config",
       "effort": "2h",
       "notes": "",
-      "done": false
+      "done": true
     },
     {
       "id": "k3_7",
@@ -529,7 +529,7 @@
       "title": "K.3.7 Per-tenant knowledge base wiring (reuse Phase F.1 CustomerMemory + pgvector)",
       "effort": "3h",
       "notes": "",
-      "done": false
+      "done": true
     },
     {
       "id": "k3_8",
@@ -537,7 +537,7 @@
       "title": "K.3.8 Per-tenant tool access (reuse Phase F.2 Shopify/Shiprocket tool calling)",
       "effort": "3h",
       "notes": "",
-      "done": false
+      "done": true
     },
     {
       "id": "k3_9",
@@ -545,7 +545,7 @@
       "title": "K.3.9 Test with 2 different tenant configs — verify complete isolation",
       "effort": "2h",
       "notes": "",
-      "done": false
+      "done": true
     },
     {
       "id": "k4_1",
@@ -553,7 +553,7 @@
       "title": "K.4.1 On call start — create Chatwoot conversation (channel: voice, status: open)",
       "effort": "2h",
       "notes": "K.4 — Chatwoot Integration (4 days)",
-      "done": false
+      "done": true
     },
     {
       "id": "k4_2",
@@ -561,7 +561,7 @@
       "title": "K.4.2 Stream real-time transcript as conversation messages",
       "effort": "3h",
       "notes": "",
-      "done": false
+      "done": true
     },
     {
       "id": "k4_3",
@@ -569,7 +569,7 @@
       "title": "K.4.3 AI responses logged as bot messages in conversation",
       "effort": "1h",
       "notes": "",
-      "done": false
+      "done": true
     },
     {
       "id": "k4_4",
@@ -577,7 +577,7 @@
       "title": "K.4.4 AiActionLog entries for voice interactions (reuse Phase F.5)",
       "effort": "1h",
       "notes": "",
-      "done": false
+      "done": true
     },
     {
       "id": "k4_5",
@@ -585,7 +585,7 @@
       "title": "K.4.5 Escalation: AI transfers to human agent — agent sees full transcript",
       "effort": "3h",
       "notes": "",
-      "done": false
+      "done": true
     },
     {
       "id": "k4_6",
@@ -593,7 +593,7 @@
       "title": "K.4.6 On call end — save duration, recording URL, final transcript",
       "effort": "2h",
       "notes": "",
-      "done": false
+      "done": true
     },
     {
       "id": "k4_7",
@@ -601,7 +601,7 @@
       "title": "K.4.7 Voice conversations visible in unified inbox alongside text/WhatsApp/email",
       "effort": "2h",
       "notes": "",
-      "done": false
+      "done": true
     },
     {
       "id": "k4_8",
@@ -609,7 +609,7 @@
       "title": "K.4.8 Test full flow: call → AI handles → escalate → human picks up with context",
       "effort": "2h",
       "notes": "",
-      "done": false
+      "done": true
     },
     {
       "id": "k5_1",
@@ -617,7 +617,7 @@
       "title": "K.5.1 Choose SIP provider (Telnyx recommended)",
       "effort": "1h",
       "notes": "K.5 — SIP Telephony (4 days)",
-      "done": false
+      "done": true
     },
     {
       "id": "k5_2",
@@ -625,7 +625,7 @@
       "title": "K.5.2 Configure LiveKit SIP trunk in livekit-config.yaml",
       "effort": "2h",
       "notes": "",
-      "done": false
+      "done": true
     },
     {
       "id": "k5_3",
@@ -633,7 +633,7 @@
       "title": "K.5.3 Buy test phone number via SIP provider",
       "effort": "30m",
       "notes": "",
-      "done": false
+      "done": true
     },
     {
       "id": "k5_4",
@@ -641,7 +641,7 @@
       "title": "K.5.4 Map phone number to tenant account in Rails",
       "effort": "2h",
       "notes": "",
-      "done": false
+      "done": true
     },
     {
       "id": "k5_5",
@@ -649,7 +649,7 @@
       "title": "K.5.5 Inbound flow: customer dials → SIP → LiveKit → Room → Agent with tenant config",
       "effort": "4h",
       "notes": "",
-      "done": false
+      "done": true
     },
     {
       "id": "k5_6",
@@ -657,7 +657,7 @@
       "title": "K.5.6 Test real phone call end-to-end",
       "effort": "1h",
       "notes": "",
-      "done": false
+      "done": true
     },
     {
       "id": "k5_7",
@@ -665,7 +665,7 @@
       "title": "K.5.7 Phone number management UI in tenant dashboard",
       "effort": "3h",
       "notes": "",
-      "done": false
+      "done": true
     },
     {
       "id": "k5_8",
@@ -673,7 +673,7 @@
       "title": "K.5.8 Per-tenant phone number provisioning API",
       "effort": "2h",
       "notes": "",
-      "done": false
+      "done": true
     },
     {
       "id": "k6_1",
@@ -681,7 +681,7 @@
       "title": "K.6.1 Build widget JS bundle using LiveKit JS SDK (livekit-client)",
       "effort": "3h",
       "notes": "K.6 — Click-to-Call Widget (3 days)",
-      "done": false
+      "done": true
     },
     {
       "id": "k6_2",
@@ -689,7 +689,7 @@
       "title": "K.6.2 Widget UI: floating call button, call screen with timer, mute, end call",
       "effort": "4h",
       "notes": "",
-      "done": false
+      "done": true
     },
     {
       "id": "k6_3",
@@ -697,7 +697,7 @@
       "title": "K.6.3 Brand with TAMALE colors, customizable per tenant",
       "effort": "2h",
       "notes": "",
-      "done": false
+      "done": true
     },
     {
       "id": "k6_4",
@@ -705,7 +705,7 @@
       "title": "K.6.4 Widget auth: tenant token validates, creates room, connects",
       "effort": "2h",
       "notes": "",
-      "done": false
+      "done": true
     },
     {
       "id": "k6_5",
@@ -713,7 +713,7 @@
       "title": "K.6.5 Embed code generator in tenant dashboard",
       "effort": "2h",
       "notes": "",
-      "done": false
+      "done": true
     },
     {
       "id": "k6_6",
@@ -721,7 +721,7 @@
       "title": "K.6.6 Host widget JS at tamaleapp.com/voice-widget.js",
       "effort": "1h",
       "notes": "",
-      "done": false
+      "done": true
     },
     {
       "id": "k6_7",
@@ -729,7 +729,7 @@
       "title": "K.6.7 Test on external website — embed and make a call",
       "effort": "1h",
       "notes": "",
-      "done": false
+      "done": true
     },
     {
       "id": "k7_1",
@@ -905,7 +905,7 @@
       "title": "I.6 Theme abstraction layer (CSS vars + brand tokens)",
       "effort": "6h",
       "notes": "← NEXT — fixes all cosmetic leaks",
-      "done": false
+      "done": true
     },
     {
       "id": "i7",
@@ -921,7 +921,7 @@
       "title": "I.8 Redesign dashboard shell (sidebar/topbar/spacing)",
       "effort": "12h",
       "notes": "Sidebar/topbar/typography — the big UI work",
-      "done": false
+      "done": true
     },
     {
       "id": "i9",
@@ -1081,7 +1081,7 @@
       "title": "WebRTC Live Call Handoff",
       "effort": "16h",
       "notes": "TURN server (coturn) + signaling. Agent joins live AI calls when escalated",
-      "done": false
+      "done": true
     },
     {
       "id": "v2",
